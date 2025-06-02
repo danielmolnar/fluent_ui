@@ -435,8 +435,10 @@ class _ComboBoxMenuRouteLayout<T> extends SingleChildLayoutDelegate {
     // the view height. This ensures a tappable area outside of the simple menu
     // with which to dismiss the menu.
     //   -- https://material.io/design/components/menus.html#usage
-    final double maxHeight =
-        math.max(0.0, constraints.maxHeight - 2 * kComboBoxItemHeight);
+    final double maxHeight = math.min(
+      math.max(0.0, constraints.maxHeight - 2 * kComboBoxItemHeight),
+      route.menuMaxHeight ?? double.infinity,
+    );
     // The width of a menu should be at most the view width. This ensures that
     // the menu does not extend past the left and right edges of the screen.
     final double width = math.min(constraints.maxWidth, buttonRect.width);
@@ -525,6 +527,7 @@ class _ComboBoxRoute<T> extends PopupRoute<_ComboBoxRouteResult<T>> {
     required this.acrylicEnabled,
     this.barrierLabel,
     this.popupColor,
+    this.menuMaxHeight,
   }) : itemHeights = List<double>.filled(items.length, kComboBoxItemHeight);
 
   final List<ComboBoxItem<T>> items;
@@ -539,6 +542,8 @@ class _ComboBoxRoute<T> extends PopupRoute<_ComboBoxRouteResult<T>> {
 
   final List<double> itemHeights;
   ScrollController? scrollController;
+
+  final double? menuMaxHeight;
 
   @override
   Duration get transitionDuration => _kComboBoxMenuDuration;
@@ -594,10 +599,14 @@ class _ComboBoxRoute<T> extends PopupRoute<_ComboBoxRouteResult<T>> {
   // that's possible given availableHeight.
   _MenuLimits getMenuLimits(
       Rect buttonRect, double availableHeight, int index) {
-    var computedMaxHeight = availableHeight - 2.0 * kComboBoxItemHeight;
-    // if (menuMaxHeight != null) {
-    //   computedMaxHeight = math.min(computedMaxHeight, menuMaxHeight!);
-    // }
+    // Allow room for a “tap outside to close” strip above and below.
+    double computedMaxHeight =
+        math.max(0.0, availableHeight - 2.0 * kComboBoxItemHeight);
+
+    // Respect the caller’s explicit cap – but never exceed free space.
+    if (menuMaxHeight != null) {
+      computedMaxHeight = math.min(computedMaxHeight, menuMaxHeight!);
+    }
     final buttonTop = buttonRect.top;
     final double buttonBottom = math.min(buttonRect.bottom, availableHeight);
     final selectedItemOffset = getItemOffset(index);
@@ -902,6 +911,7 @@ class ComboBox<T> extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
     this.popupColor,
+    this.menuMaxHeight,
     // When adding new arguments, consider adding similar arguments to
     // ComboBoxFormField.
   });
@@ -1092,6 +1102,9 @@ class ComboBox<T> extends StatefulWidget {
   /// If it is not provided, the default [Acrylic] color is used.
   final Color? popupColor;
 
+  /// The maximum height of the combo box menu.
+  final double? menuMaxHeight;
+
   @override
   State<ComboBox<T>> createState() => ComboBoxState<T>();
 }
@@ -1210,6 +1223,7 @@ class ComboBoxState<T> extends State<ComboBox<T>> {
       style: textStyle!,
       barrierLabel: FluentLocalizations.of(context).modalBarrierDismissLabel,
       popupColor: widget.popupColor,
+      menuMaxHeight: widget.menuMaxHeight,
     );
 
     navigator
