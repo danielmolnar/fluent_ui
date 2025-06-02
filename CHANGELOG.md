@@ -1,3 +1,9 @@
+## 4.12.1
+
+- feat: Added `ComboBox.menuMaxHeight`, allowing the popup list to be capped at a custom height and to become scrollable when the limit is reached.
+- feat: Added `ComboBox.useSafeArea` (opt-in, default `false`) so you can wrap the popup in a `SafeArea`; existing behaviour is unchanged unless you enable it.
+
+
 ## 4.12.0
 
 - feat: Support Flutter 3.32

@@ -435,6 +435,8 @@ class _ComboBoxMenuRouteLayout<T> extends SingleChildLayoutDelegate {
     // the view height. This ensures a tappable area outside of the simple menu
     // with which to dismiss the menu.
     //   -- https://material.io/design/components/menus.html#usage
+
+    // Clamp to available screen space and the optional menuMaxHeight cap.
     final double maxHeight = math.min(
       math.max(0.0, constraints.maxHeight - 2 * kComboBoxItemHeight),
       route.menuMaxHeight ?? double.infinity,
