@@ -528,6 +528,7 @@ class _ComboBoxRoute<T> extends PopupRoute<_ComboBoxRouteResult<T>> {
     this.barrierLabel,
     this.popupColor,
     this.menuMaxHeight,
+    this.useSafeArea = false,
   }) : itemHeights = List<double>.filled(items.length, kComboBoxItemHeight);
 
   final List<ComboBoxItem<T>> items;
@@ -544,6 +545,7 @@ class _ComboBoxRoute<T> extends PopupRoute<_ComboBoxRouteResult<T>> {
   ScrollController? scrollController;
 
   final double? menuMaxHeight;
+  final bool useSafeArea;
 
   @override
   Duration get transitionDuration => _kComboBoxMenuDuration;
@@ -731,20 +733,26 @@ class _ComboBoxRoutePage<T> extends StatelessWidget {
       popupColor: popupColor,
     );
 
+    final Widget layout = CustomSingleChildLayout(
+      delegate: _ComboBoxMenuRouteLayout<T>(
+        buttonRect: buttonRect,
+        route: route,
+        textDirection: textDirection,
+      ),
+      child: capturedThemes.wrap(menu),
+    );
+
+    if (route.useSafeArea) {
+      return SafeArea(child: layout);
+    }
+
     return MediaQuery.removePadding(
       context: context,
       removeTop: true,
       removeBottom: true,
       removeLeft: true,
       removeRight: true,
-      child: CustomSingleChildLayout(
-        delegate: _ComboBoxMenuRouteLayout<T>(
-          buttonRect: buttonRect,
-          route: route,
-          textDirection: textDirection,
-        ),
-        child: capturedThemes.wrap(menu),
-      ),
+      child: layout,
     );
   }
 }
@@ -912,6 +920,7 @@ class ComboBox<T> extends StatefulWidget {
     this.autofocus = false,
     this.popupColor,
     this.menuMaxHeight,
+    this.useSafeArea = false,
     // When adding new arguments, consider adding similar arguments to
     // ComboBoxFormField.
   });
@@ -1105,6 +1114,9 @@ class ComboBox<T> extends StatefulWidget {
   /// The maximum height of the combo box menu.
   final double? menuMaxHeight;
 
+  /// Whether to use a [SafeArea] to avoid system UI intrusions.
+  final bool useSafeArea;
+
   @override
   State<ComboBox<T>> createState() => ComboBoxState<T>();
 }
@@ -1224,6 +1236,7 @@ class ComboBoxState<T> extends State<ComboBox<T>> {
       barrierLabel: FluentLocalizations.of(context).modalBarrierDismissLabel,
       popupColor: widget.popupColor,
       menuMaxHeight: widget.menuMaxHeight,
+      useSafeArea: widget.useSafeArea,
     );
 
     navigator
